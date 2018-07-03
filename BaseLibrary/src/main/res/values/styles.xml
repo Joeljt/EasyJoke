@@ -22,4 +22,9 @@
         <item name="android:windowNoTitle">true</item>
 
     </style>
+
+    <style name="dialog_from_bottom_anim">
+        <item name="android:windowEnterAnimation">@anim/dialog_from_bottom_in</item>
+        <item name="android:windowExitAnimation">@anim/dialog_from_bottom_out</item>
+    </style>
 </resources>
