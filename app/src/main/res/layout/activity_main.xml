@@ -6,6 +6,21 @@
               android:orientation="vertical"
     tools:context="com.ljt.easyjoke.MainActivity">
 
+    <EditText
+        android:id="@+id/et_1"
+        android:hint="这是第一个"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/et_2"
+        android:hint="这是第二个"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/et_3"
+        android:hint="这是第三个"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
     <Button
         android:id="@+id/tv_test"
         android:layout_width="wrap_content"

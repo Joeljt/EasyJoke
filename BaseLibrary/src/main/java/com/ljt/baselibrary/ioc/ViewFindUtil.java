@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.lang.reflect.Field;
@@ -18,30 +20,78 @@ import java.lang.reflect.Method;
 
 public class ViewFindUtil {
 
-    public static void inject(Activity activity){
+    public static void inject(Activity activity) {
         inject(new ViewFinder(activity), activity);
     }
 
-    public static void inject(View view){
+    public static void inject(View view) {
         inject(new ViewFinder(view), view);
     }
 
-    public static void inject(View view, Object obj){
+    public static void inject(View view, Object obj) {
         inject(new ViewFinder(view), obj);
     }
 
     /**
      * 注入
+     *
      * @param finder 注入工具类
-     * @param obj 反射执行的类
+     * @param obj    反射执行的类
      */
-    private static void inject(ViewFinder finder, Object obj){
+    private static void inject(ViewFinder finder, Object obj) {
         injectField(finder, obj);
         injectEvent(finder, obj);
+        injectCheckInput(finder, obj);
+    }
+
+    /**
+     * 注入 EditText 输入检测
+     *
+     * @param finder
+     * @param obj
+     */
+    private static void injectCheckInput(final ViewFinder finder, final Object obj) {
+
+        Class<?> clazz = obj.getClass();
+        Method[] methods = clazz.getDeclaredMethods();
+        for (final Method method : methods) {
+            CheckInput checkInput = method.getAnnotation(CheckInput.class);
+            if (checkInput != null) {
+
+                // 获取传入的 viewIds, 第一个是 buttonId，其余为 EditText
+                final int[] value = checkInput.value();
+                finder.findViewById(value[0]).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        for (int i = 1; i < value.length; i++) {
+                            View viewById = finder.findViewById(value[i]);
+                            if (viewById instanceof EditText) {
+                                EditText et = (EditText) viewById;
+                                if (TextUtils.isEmpty(et.getText().toString().trim())) {
+                                    Toast.makeText(viewById.getContext(), et.getHint().toString(), Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                            }
+                        }
+
+                        try {
+                            method.setAccessible(true);
+                            method.invoke(obj, null);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                });
+
+            }
+        }
+
     }
 
     /**
      * 注入事件
+     *
      * @param finder
      * @param obj
      */
@@ -55,7 +105,7 @@ public class ViewFindUtil {
             OnClick onClick = method.getAnnotation(OnClick.class);
 
             // 获取标记了 onClick 的方法
-            if (onClick != null){
+            if (onClick != null) {
                 // viewId 数组
                 int[] viewIds = onClick.value();
 
@@ -65,7 +115,7 @@ public class ViewFindUtil {
                     boolean isCheckNet = method.getAnnotation(CheckNet.class) != null;
 
                     // 执行反射方法
-                    if (viewById != null){
+                    if (viewById != null) {
                         viewById.setOnClickListener(new DeclaredOnClickListener(method, obj, isCheckNet));
                     }
                 }
@@ -78,6 +128,7 @@ public class ViewFindUtil {
 
     /**
      * 注入属性
+     *
      * @param finder
      * @param obj
      */
@@ -90,12 +141,12 @@ public class ViewFindUtil {
 
             // 获取标记了「FindView」注解的属性
             FindView findView = field.getAnnotation(FindView.class);
-            if (findView != null){
+            if (findView != null) {
                 // 获取注解的viewId，并且获取对应的View
                 int viewId = findView.value();
                 View viewById = finder.findViewById(viewId);
 
-                if (viewById == null){
+                if (viewById == null) {
                     throw new Resources.NotFoundException("No such resource ID in this xml: " + viewId);
                 }
 
@@ -112,7 +163,7 @@ public class ViewFindUtil {
         }
     }
 
-    static class DeclaredOnClickListener implements View.OnClickListener{
+    static class DeclaredOnClickListener implements View.OnClickListener {
 
         private Method method;
         private Object obj;
@@ -124,13 +175,21 @@ public class ViewFindUtil {
             this.isCheckNet = isCheckNet;
         }
 
+        public DeclaredOnClickListener(Method method, Object obj) {
+            this.method = method;
+            this.obj = obj;
+        }
+
         @Override
         public void onClick(View v) {
 
-            if (isCheckNet && !isNetworkAvailable(v.getContext())){
+            // 判断网络
+            if (isCheckNet && !isNetworkAvailable(v.getContext())) {
                 Toast.makeText(v.getContext(), "请检查网络后重试", Toast.LENGTH_SHORT).show();
                 return;
             }
+
+            // 判断是否需要监听
 
             method.setAccessible(true);
             try {
@@ -148,6 +207,7 @@ public class ViewFindUtil {
 
     /**
      * 监测网络是否可用
+     *
      * @param context
      * @return
      */
