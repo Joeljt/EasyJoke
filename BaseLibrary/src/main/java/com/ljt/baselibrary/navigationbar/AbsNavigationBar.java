@@ -62,7 +62,7 @@ public abstract class AbsNavigationBar<P extends AbsNavigationBar.Builder.AbsNav
         // 对 parent 判空，如果为空，说明未指明id
         if (mParams.mParent == null) {
             // 获取 contentView 的根布局
-            ViewGroup rootView = (ViewGroup) ((Activity) (mParams.mContext)).findViewById(android.R.id.content);
+            ViewGroup rootView = (ViewGroup) ((Activity) (mParams.mContext)).getWindow().getDecorView();
             mParams.mParent = (ViewGroup) rootView.getChildAt(0);
         }
 

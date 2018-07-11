@@ -25,7 +25,7 @@ public class DefaultNavigationBar extends AbsNavigationBar<DefaultNavigationBar.
 
     @Override
     public void applyView() {
-        setText(R.id.tv_test, getParams().mTitle);
+        setText(R.id.title, getParams().mTitle);
 
 
     }

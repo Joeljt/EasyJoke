@@ -1,5 +1,6 @@
 package com.ljt.easyjoke;
 
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,17 +25,17 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void initTitle() {
-//        DefaultNavigationBar defaultNavigationBar = new DefaultNavigationBar
-//                .Builder(this)
-//                .setTitle("这个标题")
-//                .setRightText("发布")
-//                .setRightClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//
-//                    }
-//                })
-//                .build();
+        DefaultNavigationBar defaultNavigationBar = new DefaultNavigationBar
+                .Builder(this)
+                .setTitle("这个标题")
+                .setRightText("发布")
+                .setRightClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                })
+                .build();
     }
 
     @Override
